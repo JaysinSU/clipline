@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Swift version
+        run: swift --version
+      - name: Build
+        run: swift build
+      - name: Test clipboard
+        run: bash scripts/test-clipboard.sh
+      - name: Check strings
+        run: swift scripts/check-strings.swift
+      - name: Build app
+        run: bash scripts/build-app.sh

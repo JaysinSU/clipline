@@ -8,7 +8,7 @@ An open source enhancement of [Tendedero](https://github.com/alejandrobujan/tend
 
 ## Install and use
 
-1. Download `Clipline-1.1.2.zip` from Releases, unzip it and move `Clipline.app` to Applications.
+1. Download `Clipline-<version>.zip` from Releases, unzip it and move `Clipline.app` to Applications.
 2. Quit the original Tendedero if it is running, then open Clipline. A clothes icon appears in the menu bar.
 3. Clipboard image receiving is enabled by default. Complete a Feishu/Lark screenshot with Copy/Done so that the image is written to the system clipboard.
 4. Press **Option + Q**, or choose Show line from the menu, to show or hide your images. Hovering over the menu bar also shows the line on the normal desktop.

@@ -4,6 +4,7 @@ import Carbon
 /// key monitor, it needs no Accessibility permission.
 final class HotKey {
     private var ref: EventHotKeyRef?
+    let isRegistered: Bool
     private static var action: (() -> Void)?
 
     init(keyCode: Int, modifiers: Int, action: @escaping () -> Void) {
@@ -14,7 +15,8 @@ final class HotKey {
             return noErr
         }, 1, &spec, nil, nil)
         let id = EventHotKeyID(signature: OSType(0x5445_4E44), id: 1) // "TEND"
-        RegisterEventHotKey(UInt32(keyCode), UInt32(modifiers), id, GetApplicationEventTarget(), 0, &ref)
+        let status = RegisterEventHotKey(UInt32(keyCode), UInt32(modifiers), id, GetApplicationEventTarget(), 0, &ref)
+        isRegistered = status == noErr && ref != nil
     }
 
     deinit {

@@ -501,6 +501,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         toggleItem.keyEquivalentModifierMask = [.option]
         menu.addItem(toggleItem)
 
+        if hotKey?.isRegistered == false {
+            let item = NSMenuItem(title: L("Option + Q is used by another app"), action: nil, keyEquivalent: "")
+            item.isEnabled = false
+            menu.addItem(item)
+            NSLog("Option + Q is used by another app")
+        }
+
         let clearItem = ClosureMenuItem(L("Take everything down")) { [weak self] in
             self?.line.clear()
         }
