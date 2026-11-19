@@ -213,6 +213,37 @@ final class ClipboardWatcherTests {
         try XCTAssertTrue(restored.containsImage(fingerprint))
     }
 
+    func testPruneClipboardFolderKeepsHungAndNewestUnhungImages() throws {
+        let clipboardFolder = folder.appendingPathComponent("clipboard")
+        try FileManager.default.createDirectory(at: clipboardFolder, withIntermediateDirectories: true)
+        var images: [URL] = []
+        for index in 0..<5 {
+            let file = clipboardFolder.appendingPathComponent("image-\(index).png")
+            try image().write(to: file)
+            try FileManager.default.setAttributes(
+                [.creationDate: Date(timeIntervalSince1970: 1_700_000_000 + Double(index) * 60)],
+                ofItemAtPath: file.path
+            )
+            images.append(file)
+        }
+
+        let suite = "CliplineTests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(true, forKey: "soundOff")
+        let line = Line(defaults: defaults, clipboardFolder: clipboardFolder)
+        _ = try XCTUnwrap(line.hang(images[0], quietly: true))
+        line.pruneClipboardFolder(keep: 2, remove: { try FileManager.default.removeItem(at: $0) })
+
+        try XCTAssertTrue(FileManager.default.fileExists(atPath: images[0].path))
+        for file in images.suffix(2) {
+            try XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
+        }
+        for file in images[1..<3] {
+            try XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        }
+    }
+
     func testCopyingFromLineDoesNotLoopBack() throws {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let file = folder.appendingPathComponent("copy-test.png")
@@ -268,6 +299,7 @@ struct TestRunner {
             ("testAnnouncedImageCanArriveLater", suite.testAnnouncedImageCanArriveLater),
             ("testTimerReceivesAndStopDisablesReception", suite.testTimerReceivesAndStopDisablesReception),
             ("testLineDeduplicatesBothDeliveryOrdersAndPersists", suite.testLineDeduplicatesBothDeliveryOrdersAndPersists),
+            ("testPruneClipboardFolderKeepsHungAndNewestUnhungImages", suite.testPruneClipboardFolderKeepsHungAndNewestUnhungImages),
             ("testCopyingFromLineDoesNotLoopBack", suite.testCopyingFromLineDoesNotLoopBack)
         ]
         var failures = 0

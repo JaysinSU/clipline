@@ -8,14 +8,14 @@
 
 ## 安装
 
-1. 打开 [Releases](https://github.com/JaysinSU/clipline/releases/latest)，下载 `Clipline-1.1.2.zip`。只想使用应用，下载这个文件即可。
+1. 打开 [Releases](https://github.com/JaysinSU/clipline/releases/latest)，下载 `Clipline-<版本号>.zip`。只想使用应用，下载这个文件即可。
 2. 解压，将 `Clipline.app` 拖入「应用程序」文件夹。
 3. 如在使用原版 Tendedero，先退出原版，再启动 Clipline。菜单栏会出现衣服图标。
 4. 默认开启“接收剪贴板图片（飞书截图）”。用飞书截图，点击“完成/复制”，让截图进入剪贴板，图片会自动挂上绳子。
 
 此版本采用本地 ad-hoc 签名，尚未通过 Apple 公证。首次打开若被 macOS 拦截，请确认文件来自本仓库，再按 [Apple 的打开说明](https://support.apple.com/zh-cn/102445) 在「系统设置 → 隐私与安全性」中授权打开。
 
-完整源码可从本仓库下载；发布页的 `Clipline-1.1.2-source.zip` 包含源码、构建脚本、测试、说明和许可。`Clipline-1.1.2-all.zip` 同时包含应用与完整源码。`SHA256SUMS.txt` 提供这些文件的校验值。
+完整源码可从本仓库下载；发布页的 `Clipline-<版本号>-source.zip` 包含源码、构建脚本、测试、说明和许可。`Clipline-<版本号>-all.zip` 同时包含应用与完整源码。`SHA256SUMS.txt` 提供这些文件的校验值。
 
 ## 使用
 

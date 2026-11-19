@@ -55,6 +55,7 @@ final class Line: ObservableObject {
         self.defaults = defaults
         self.clipboardFolder = clipboardFolder ?? ClipboardWatcher.folder
         restore()
+        pruneClipboardFolder()
         scheduleGust()
     }
 
@@ -120,7 +121,9 @@ final class Line: ObservableObject {
         save()
         if !quietly { play("Pop", volume: 0.25) }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
-            self?.items.removeAll { $0.id == id }
+            guard let self else { return }
+            self.items.removeAll { $0.id == id }
+            self.pruneClipboardFolder()
         }
     }
 
@@ -137,6 +140,44 @@ final class Line: ObservableObject {
     func prune() {
         for item in items where !item.falling && !FileManager.default.fileExists(atPath: item.url.path) {
             drop(item.id, quietly: true)
+        }
+    }
+
+    /// Unhung clipboard images are the only copy. Keep the newest few and
+    /// send older ones to the Trash.
+    func pruneClipboardFolder(keep: Int = 50, remove: (URL) throws -> Void = { url in
+        try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+    }) {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: clipboardFolder.path) else { return }
+
+        let hung = Set(items.filter { !$0.falling }.map { $0.url.standardizedFileURL })
+        let urls: [URL]
+        do {
+            urls = try fileManager.contentsOfDirectory(
+                at: clipboardFolder,
+                includingPropertiesForKeys: [.creationDateKey, .isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            )
+        } catch {
+            log.error("Could not list clipboard images: \(error.localizedDescription, privacy: .public)")
+            return
+        }
+
+        let candidates = urls.compactMap { url -> (url: URL, date: Date)? in
+            guard url.pathExtension.lowercased() == "png",
+                  !hung.contains(url.standardizedFileURL),
+                  let values = try? url.resourceValues(forKeys: [.creationDateKey, .isRegularFileKey]),
+                  values.isRegularFile == true else { return nil }
+            return (url, values.creationDate ?? .distantPast)
+        }.sorted { $0.date > $1.date }
+
+        for candidate in candidates.dropFirst(max(0, keep)) {
+            do {
+                try remove(candidate.url)
+            } catch {
+                log.error("Could not trash clipboard image: \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
