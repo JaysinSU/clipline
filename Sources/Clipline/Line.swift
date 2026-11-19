@@ -165,7 +165,8 @@ final class Line: ObservableObject {
         }
 
         let candidates = urls.compactMap { url -> (url: URL, date: Date)? in
-            guard url.pathExtension.lowercased() == "png",
+            guard url.lastPathComponent.hasPrefix("Clipboard-"),
+                  url.pathExtension.lowercased() == "png",
                   !hung.contains(url.standardizedFileURL),
                   let values = try? url.resourceValues(forKeys: [.creationDateKey, .isRegularFileKey]),
                   values.isRegularFile == true else { return nil }

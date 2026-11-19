@@ -218,7 +218,7 @@ final class ClipboardWatcherTests {
         try FileManager.default.createDirectory(at: clipboardFolder, withIntermediateDirectories: true)
         var images: [URL] = []
         for index in 0..<5 {
-            let file = clipboardFolder.appendingPathComponent("image-\(index).png")
+            let file = clipboardFolder.appendingPathComponent("Clipboard-\(index).png")
             try image().write(to: file)
             try FileManager.default.setAttributes(
                 [.creationDate: Date(timeIntervalSince1970: 1_700_000_000 + Double(index) * 60)],
@@ -226,6 +226,12 @@ final class ClipboardWatcherTests {
             )
             images.append(file)
         }
+        let userFile = clipboardFolder.appendingPathComponent("saved-by-user.png")
+        try image().write(to: userFile)
+        try FileManager.default.setAttributes(
+            [.creationDate: Date(timeIntervalSince1970: 1_600_000_000)],
+            ofItemAtPath: userFile.path
+        )
 
         let suite = "CliplineTests-\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
@@ -236,6 +242,7 @@ final class ClipboardWatcherTests {
         line.pruneClipboardFolder(keep: 2, remove: { try FileManager.default.removeItem(at: $0) })
 
         try XCTAssertTrue(FileManager.default.fileExists(atPath: images[0].path))
+        try XCTAssertTrue(FileManager.default.fileExists(atPath: userFile.path))
         for file in images.suffix(2) {
             try XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
         }
